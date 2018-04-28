@@ -6,7 +6,7 @@ class Node:
         self.children = []
 
     def __str__(self):
-        return '<ch=%s, children=%s>' % (self.ch, self.children)
+        return '<ch=%s, parent=%s, children=%s>' % (self.ch, id(self.parent), self.children)
 
     __repr__ = __str__
 
@@ -27,7 +27,7 @@ class Trie:
     def _add(self, chars, node):
         node.size += 1
         if len(chars) == 0:
-            node.children.append(Node("*"))
+            node.children.append(Node("*", parent=node))
             return
         first_char, rest_chars = chars[0], chars[1:]
         child_node = self._find_node_with_ch(first_char, node.children)
@@ -43,6 +43,10 @@ class Trie:
         if len(nodes) == 0:
             return 0
         if len(chars) == 0:
+            if len(nodes) == 0:
+                return 0
+            if nodes[0].parent is None:
+                return 0
             return nodes[0].parent.size
         first_char, rest_chars = chars[0], chars[1:]
         node = self._find_node_with_ch(first_char, nodes)
