@@ -1,9 +1,8 @@
-from multiprocessing import Pool
-
-
 class Node:
-    def __init__(self, ch=None):
+    def __init__(self, ch=None, parent=None):
+        self.parent = parent
         self.ch = ch
+        self.size = 0
         self.children = []
 
     def __str__(self):
@@ -26,33 +25,25 @@ class Trie:
         return None
 
     def _add(self, chars, node):
+        node.size += 1
         if len(chars) == 0:
             node.children.append(Node("*"))
             return
         first_char, rest_chars = chars[0], chars[1:]
         child_node = self._find_node_with_ch(first_char, node.children)
         if child_node is None:
-            child_node = Node(first_char)
+            child_node = Node(first_char, parent=node)
             node.children.append(child_node)
         return self._add(rest_chars, child_node)
 
     def add(self, name):
         self._add(name, self.root)
 
-    def _num_words_at_node(self, node):
-        if node is None:
-            return 0
-
-        if node.ch == '*':
-            return 1
-
-        return sum(map(self._num_words_at_node, node.children))
-
     def _find(self, chars, nodes):
         if len(nodes) == 0:
             return 0
         if len(chars) == 0:
-            return sum(map(self._num_words_at_node, nodes))
+            return nodes[0].parent.size
         first_char, rest_chars = chars[0], chars[1:]
         node = self._find_node_with_ch(first_char, nodes)
         if node is None:
