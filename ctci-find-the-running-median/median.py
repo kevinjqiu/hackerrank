@@ -1,16 +1,17 @@
 #!/bin/python3
+import array
 
 
 class Heap:
     @staticmethod
     def copy(heap):
         h = Heap(0)
-        h.arr = list(heap.arr)
+        h.arr = array.array('i', heap.arr)
         h.size = heap.size
         return h
 
     def __init__(self, max_size):
-        self.arr = [None] * max_size
+        self.arr = array.array('i', [-1] * max_size)
         self.size = 0
 
     def parent_index(self, i):
@@ -31,38 +32,44 @@ class Heap:
 
     def pop(self):
         retval = self.arr[0]
-        self.arr[0] = None
+        self.arr[0] = -1
         self.arr[0], self.arr[self.size-1] = self.arr[self.size-1], self.arr[0]
         self.size -= 1
         self.heapify_down(0)
         return retval
 
-    def heapify_down(self, i):
-        left_child_index = self.left_child_index(i)
-        right_child_index = self.right_child_index(i)
+    def swap(self, i, j):
+        """Swap arr at i and j
+        """
+        self.arr[i], self.arr[j] = self.arr[j], self.arr[i]
 
-        lcv = None if left_child_index >= self.size else self.arr[left_child_index]
-        rcv = None if right_child_index >= self.size else self.arr[right_child_index]
-
-        print(lcv, rcv)
-        if lcv is None and rcv is None:
-            return
-
-        cnv = self.arr[i]  # current node value
-        if lcv is not None and rcv is None:
-            if cnv > lcv:
-                self.arr[i], self.arr[left_child_index] = self.arr[left_child_index], self.arr[i]
-                return self.heapify_down(left_child_index)
-
-        if cnv < lcv and cnv < rcv:
-            return
-
-        if lcv > rcv:
-            self.arr[i], self.arr[right_child_index] = self.arr[right_child_index], self.arr[i]
-            return self.heapify_down(right_child_index)
+    def min(self, a, b):
+        idx_a, val_a = a
+        idx_b, val_b = b
+        if val_a > val_b:
+            return idx_b, val_b
         else:
-            self.arr[i], self.arr[left_child_index] = self.arr[left_child_index], self.arr[i]
-            return self.heapify_down(left_child_index)
+            return idx_a, val_a
+
+    def heapify_down(self, i):
+        lci = self.left_child_index(i)
+        rci = self.right_child_index(i)
+
+        lcv = -1 if lci >= self.size else self.arr[lci]
+        rcv = -1 if rci >= self.size else self.arr[rci]
+
+        cnv = self.arr[i]  # curent node value
+        if rcv != -1:
+            # both left child and right child exist
+            min_idx, min_val = self.min((lci, lcv), (rci, rcv))
+            if min_val < cnv:
+                self.swap(i, min_idx)
+                return self.heapify_down(min_idx)
+        else:
+            if lcv != -1:
+                if lcv < cnv:
+                    self.swap(i, lci)
+                    return self.heapify_down(lci)
 
     def heapify(self, i):
         parent_idx = self.parent_index(i)
@@ -70,32 +77,9 @@ class Heap:
             return  # top of the heap. we're done
 
         if self.arr[i] < self.arr[parent_idx]:
-            self.arr[i], self.arr[parent_idx] = self.arr[parent_idx], self.arr[i]
+            self.swap(i, parent_idx)
             return self.heapify(parent_idx)
 
-        return
-
-
-heap = Heap(10)
-heap.add(1)
-heap.add(2)
-heap.add(3)
-
-# new_heap = Heap.copy(heap)
-# import pdb; pdb.set_trace()  # XXX BREAKPOINT
-# if heap.size % 2 == 1:
-#     steps = int(heap.size / 2)
-#     for _ in range(steps):
-#         new_heap.pop()
-#     median = new_heap.pop()
-# else:
-#     steps = int(heap.size / 2) - 1
-#     for _ in range(steps):
-#         new_heap.pop()
-#     left = new_heap.pop()
-#     right = new_heap.pop()
-#     median = (left + right) / 2
-# print('%.1f' % median)
 
 n = int(input().strip())
 heap = Heap(n)
@@ -106,7 +90,6 @@ for a_i in range(n):
     a.append(a_t)
     heap.add(a_t)
 
-    print(heap.arr)
     new_heap = Heap.copy(heap)
     if heap.size % 2 == 1:
         steps = int(heap.size / 2)

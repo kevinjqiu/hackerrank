@@ -10,4 +10,7 @@ Use a heap
 
 Use a heap to always keep the list sorted. 
 
-Take the median is approximately O(n/2)
+Take the median is approximately O(n/2), and with n input numbers, it's O(n^2)
+
+Obviously this is still too slow for large sets
+
