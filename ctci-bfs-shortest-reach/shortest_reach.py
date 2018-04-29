@@ -27,7 +27,7 @@ class Graph:
             dist_u, u = min([(dist[u], u) for u in q], key=itemgetter(0))
             q.remove(u)
 
-            for v in self.adjacency_list.get(u):
+            for v in self.adjacency_list.get(u, []):
                 alt = dist_u + 1
                 if alt < dist[v]:
                     dist[v] = alt
