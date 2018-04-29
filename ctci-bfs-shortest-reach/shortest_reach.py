@@ -1,41 +1,45 @@
 from collections import defaultdict, deque
+from operator import itemgetter
+
+
+MAX_INTEGER = 2 ** 32
 
 
 class Graph:
     def __init__(self, n):
         self.n = n  # number of nodes
-        # self.nodes = list(range(n))
         self.adjacency_list = defaultdict(list)
 
     def connect(self, u, v):
         """Connect node u with node v
         """
         self.adjacency_list[u].append(v)
+        self.adjacency_list[v].append(u)
 
-    def bfs(self, start, end):
-        num_edges = 0
-        visited = set([])
-        to_visit = deque([])
+    def shortest_path(self, start, end):
+        q = set(list(range(self.n)))  # vertices to visit
+        dist = [MAX_INTEGER] * self.n
+        prev = [None] * self.n
 
-        to_visit.append(start)
-        while len(to_visit) > 0:
-            v = to_visit.popleft()
-            connected = self.adjacency_list.get(v, [])
-            if end in connected:
-                num_edges += 1
-                return num_edges * 6
-            num_edges += 1
-            for node in connected:
-                if node not in visited:
-                    to_visit.append(node)
-        return -1
+        dist[start] = 0
+
+        while len(q) > 0:
+            dist_u, u = min([(dist[u], u) for u in q], key=itemgetter(0))
+            q.remove(u)
+
+            for v in self.adjacency_list.get(u):
+                alt = dist_u + 1
+                if alt < dist[v]:
+                    dist[v] = alt
+                    prev[v] = u
+        return -1 if dist[end] == MAX_INTEGER else dist[end] * 6
 
     def find_all_distances(self, s):
         retval = []
         for i in range(self.n):
             if i == s:
                 continue
-            retval.append(self.bfs(s, i))
+            retval.append(self.shortest_path(s, i))
         print(' '.join(map(str, retval)))
 
 
