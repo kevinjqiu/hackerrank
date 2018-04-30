@@ -16,31 +16,25 @@ class Graph:
         self.adjacency_list[u].append(v)
         self.adjacency_list[v].append(u)
 
-    def shortest_path(self, start, end):
-        q = set(list(range(self.n)))  # vertices to visit
-        dist = [MAX_INTEGER] * self.n
-        prev = [None] * self.n
+    def find_all_distances(self, s):
+        q = deque([])
+        unvisited = set([i for i in range(self.n)])
+        dist = [-1 for _ in range(self.n)]
 
-        dist[start] = 0
+        dist[s] = 0
+        q.append(s)
+        unvisited.remove(s)
 
         while len(q) > 0:
-            dist_u, u = min([(dist[u], u) for u in q], key=itemgetter(0))
-            q.remove(u)
+            u = q.popleft()
 
             for v in self.adjacency_list.get(u, []):
-                alt = dist_u + 1
-                if alt < dist[v]:
-                    dist[v] = alt
-                    prev[v] = u
-        return -1 if dist[end] == MAX_INTEGER else dist[end] * 6
+                if v in unvisited:
+                    dist[v] = dist[u] + 6
+                    unvisited.remove(v)
+                    q.append(v)
 
-    def find_all_distances(self, s):
-        retval = []
-        for i in range(self.n):
-            if i == s:
-                continue
-            retval.append(self.shortest_path(s, i))
-        print(' '.join(map(str, retval)))
+        print(' ' .join([str(dist_u) for i, dist_u in enumerate(dist) if i != s]))
 
 
 t = int(input())
